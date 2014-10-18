@@ -3,18 +3,25 @@
 
 #include "types.h"      // u16
 
-#define PCI_DEVICE_ID_INTEL_Q35_MCH     0x29c0
+#define PCI_DEVICE_ID_INTEL_Q35_MCH         0x29c0
+#define PCI_DEVICE_ID_INTEL_GEN4_MCH        0x0c00
+#define PCI_DEVICE_ID_INTEL_GEN4XEON_MCH    0x0c04
+#define PCI_DEVICE_ID_INTEL_XEONE3_MCH      0x0c08
 #define Q35_HOST_BRIDGE_PAM0            0x90
 #define Q35_HOST_BRIDGE_SMRAM           0x9d
-#define Q35_HOST_BRIDGE_PCIEXBAR        0x60
+#define Q35_HOST_BRIDGE_PCIEXBAR        0x60 //so as gen4 mch
 #define Q35_HOST_BRIDGE_PCIEXBAR_SIZE   (256 * 1024 * 1024)
 #define Q35_HOST_BRIDGE_PCIEXBAR_ADDR   0xb0000000
+
+#define Q35_GMCH 0x50
+#define Q35_GMCH_SIZE 2
+
 #define Q35_HOST_BRIDGE_PCIEXBAREN      ((u64)1)
 #define Q35_HOST_PCIE_PCI_SEGMENT       0
 #define Q35_HOST_PCIE_START_BUS_NUMBER  0
 #define Q35_HOST_PCIE_END_BUS_NUMBER    255
 
-#define PCI_DEVICE_ID_INTEL_ICH9_LPC    0x2918
+#define PCI_DEVICE_ID_INTEL_ICH9_LPC    0x8c50 //device of host LPC
 #define ICH9_LPC_PMBASE                 0x40
 #define ICH9_LPC_PMBASE_RTE             0x1
 
@@ -25,7 +32,7 @@
 #define ICH9_LPC_PIRQ_ROUT_IRQEN       0x80
 #define ICH9_LPC_PORT_ELCR1            0x4d0
 #define ICH9_LPC_PORT_ELCR2            0x4d1
-#define PCI_DEVICE_ID_INTEL_ICH9_SMBUS 0x2930
+#define PCI_DEVICE_ID_INTEL_ICH9_SMBUS 0x8c22 //device of host SMBUS
 #define ICH9_SMB_SMB_BASE              0x20
 #define ICH9_SMB_HOSTC                 0x40
 #define ICH9_SMB_HOSTC_HST_EN          0x01
