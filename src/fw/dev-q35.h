@@ -12,16 +12,21 @@
 #define Q35_HOST_BRIDGE_PCIEXBAR        0x60 //so as gen4 mch
 #define Q35_HOST_BRIDGE_PCIEXBAR_SIZE   (256 * 1024 * 1024)
 #define Q35_HOST_BRIDGE_PCIEXBAR_ADDR   0xb0000000
+#define Q35_HOST_BRIDGE_GGC             0x50
+#define Q35_HOST_BRIDGE_GGC_SIZE    2
+#define Q35_HOST_BRIDGE_BDSM            0xB0
+#define Q35_HOST_BRIDGE_BGSM            0xB4
 
-#define Q35_GMCH 0x50
-#define Q35_GMCH_SIZE 2
+#define REG_LOCK                    0x1
 
 #define Q35_HOST_BRIDGE_PCIEXBAREN      ((u64)1)
 #define Q35_HOST_PCIE_PCI_SEGMENT       0
 #define Q35_HOST_PCIE_START_BUS_NUMBER  0
 #define Q35_HOST_PCIE_END_BUS_NUMBER    255
 
-#define PCI_DEVICE_ID_INTEL_ICH9_LPC    0x8c50 //device of host LPC
+
+//#define PCI_DEVICE_ID_INTEL_ICH9_LPC    0x8c56
+#define PCI_DEVICE_ID_INTEL_ICH9_LPC    0x8c50 //X71
 #define ICH9_LPC_PMBASE                 0x40
 #define ICH9_LPC_PMBASE_RTE             0x1
 

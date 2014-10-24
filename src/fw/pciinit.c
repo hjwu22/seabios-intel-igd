@@ -21,7 +21,7 @@
 #include "string.h" // memset
 #include "util.h" // pci_setup
 #include "x86.h" // outb
-
+#include "hw/gma.h" //IGD
 #define PCI_DEVICE_MEM_MIN    (1<<12)  // 4k == page size
 #define PCI_BRIDGE_MEM_MIN    (1<<21)  // 2M == hugepage size
 #define PCI_BRIDGE_IO_MIN      0x1000  // mandated by pci bridge spec
@@ -391,7 +391,8 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
 {
     u64 addr = Q35_HOST_BRIDGE_PCIEXBAR_ADDR;
     u32 size = Q35_HOST_BRIDGE_PCIEXBAR_SIZE;
-
+    u16 ggc_value = 0;
+    u16 ggms = 0x2, gms;
     /* setup mmconfig */
     u16 bdf = dev->bdf;
     u32 upper = addr >> 32;
@@ -411,6 +412,15 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
         pci_io_low_end = 0x10000;
     else
         pci_io_low_end = acpi_pm_base;
+
+    /* setup GGC BGSM BDSM */
+    gms = GFX_STOLEN_SIZE >> 25;
+    ggc_value= (ggms << 8) | (gms << 3) | (0x1 << 1) | REG_LOCK;
+    pci_config_writew(bdf, Q35_HOST_BRIDGE_GGC, ggc_value);
+    pci_config_writel(bdf, Q35_HOST_BRIDGE_BGSM, 
+                        GFX_GTT_STOLEN_BASE | REG_LOCK);
+    pci_config_writel(bdf, Q35_HOST_BRIDGE_BDSM,
+                        GFX_STOLEN_BASE | REG_LOCK);
 }
 
 static const struct pci_device_id pci_platform_tbl[] = {
