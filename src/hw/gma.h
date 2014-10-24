@@ -3,7 +3,7 @@
 #include "types.h"
 /* FIXME: make ajustable */ 
 /* The current implementation fixes DEV0_0_0_CGF_0x50_[7:3] to 0x08 
- * which pre allocate 256MB memory for IGD.
+ * which pre allocate 480MB memory for IGD.
  * possible value are
  * 0x00         0MB
  * 0x01         32MB
@@ -14,11 +14,13 @@
  * is next to MMCFG which the size is of 256MB at B000_0000h,
  * thus the base address of GTT Stolen is C000_0000h,
  * and stolen memory base addr is C001_0000h.
- *
+ * Aware that the lower boundary of PCI memory hole is E000_0000,
+ * so total stolen memory address space should not over E000_0000
+ * in this case, C000_0000 + 482 << 20 = DE01_0000
  */
-#define GFX_STOLEN_SIZE         (256 * 1024 * 1024)
+#define GFX_STOLEN_SIZE         (480 * 1024 * 1024)
 #define GFX_GTT_STOLEN_SIZE     (2 * 1024 *1024)
-#define GFX_GTT_STOLEN_BASE     0xC0010000
+#define GFX_GTT_STOLEN_BASE     0xC0000000
 #define GFX_STOLEN_BASE     (GFX_GTT_STOLEN_BASE + GFX_GTT_STOLEN_SIZE)
 
 
