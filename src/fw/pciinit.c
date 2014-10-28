@@ -393,6 +393,7 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
     u32 size = Q35_HOST_BRIDGE_PCIEXBAR_SIZE;
     u16 ggc_value = 0;
     u16 ggms = 0x2, gms;
+    u32 gfx_stolen_base, gfx_gtt_stolen_base;
     /* setup mmconfig */
     u16 bdf = dev->bdf;
     u32 upper = addr >> 32;
@@ -413,20 +414,46 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
     else
         pci_io_low_end = acpi_pm_base;
 
-    /* setup GGC BGSM BDSM */
+    /* setup GGC BGSM BDSM TOLUD */
+    /* FIXME: read fwcfg and determine IGD PT is enabled, 
+     * then setup these registers */
+    dprintf(1, "GMA: write BGSM GDSM, Q35 should update these memoryRegion\n");
     gms = GFX_STOLEN_SIZE >> 25;
     ggc_value= (ggms << 8) | (gms << 3) | (0x1 << 1) | REG_LOCK;
     pci_config_writew(bdf, Q35_HOST_BRIDGE_GGC, ggc_value);
+
+    gfx_stolen_base = 0xb0000000 -(gms << 25);
+    gfx_gtt_stolen_base = gfx_stolen_base - (ggms << 20) + 1;
+
     pci_config_writel(bdf, Q35_HOST_BRIDGE_BGSM, 
-                        GFX_GTT_STOLEN_BASE | REG_LOCK);
+                        gfx_gtt_stolen_base | REG_LOCK);
     pci_config_writel(bdf, Q35_HOST_BRIDGE_BDSM,
-                        GFX_STOLEN_BASE | REG_LOCK);
+                        gfx_stolen_base | REG_LOCK);
+    pci_config_writel(bdf, 0xBC, 0xB0000000 | REG_LOCK );
+    pci_config_writel(bdf, 0xA4, RamSize >> 20);
+    pci_config_writel(bdf, 0xA0, REG_LOCK);
+    
+    add_e820(gfx_gtt_stolen_base, (ggms<<20), E820_RESERVED);
+    add_e820(gfx_stolen_base, (gms << 25), E820_RESERVED);
+
+    if(RamSize + RamSizeOver4G > 0xFFFFFFFF)
+    {
+        /* TOM minus ME stolen, but we don't have ME */
+        pci_config_writel(bdf, 0xAC, (RamSize + RamSizeOver4G) >> 20);
+        pci_config_writel(bdf, 0xA8, REG_LOCK);
+    }
 }
 
 static const struct pci_device_id pci_platform_tbl[] = {
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82441,
                i440fx_mem_addr_setup),
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_Q35_MCH,
+               mch_mem_addr_setup),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_GEN4_MCH,
+               mch_mem_addr_setup),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_GEN4XEON_MCH,
+               mch_mem_addr_setup),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_XEONE3_MCH,
                mch_mem_addr_setup),
     PCI_DEVICE_END
 };
