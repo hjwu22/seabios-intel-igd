@@ -446,9 +446,9 @@ vgarom_setup(void)
         foreachpci(pci) {
             if (!is_pci_vga(pci))
                 continue;
-            
+
             if (IS_DEVICE_IGD(pci->device))
-                gma_setup(pci->device);
+                gma_setup(pci);
 
             vgahook_setup(pci);
             init_pcirom(pci, 1, NULL);
