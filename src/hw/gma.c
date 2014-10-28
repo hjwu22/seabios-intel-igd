@@ -1,16 +1,20 @@
 
 #include "gma.h"
 #include "memmap.h" // add_e820
-/* FIXME: error handler ?*/
-
-    static 
-u32 setup_stolen(void)
-{
-    add_e820(GFX_GTT_STOLEN_BASE, GFX_GTT_STOLEN_SIZE, E820_RESERVED);
-    add_e820(GFX_STOLEN_BASE, GFX_STOLEN_SIZE, E820_RESERVED);
-    return 0;
+#include "output.h" //dprintf
+#define MMIO_READ(addr, value, bits) {\
+    value = *((u##bits *)gmmio + (addr));\
 }
 
+#define MMIO_WRITE(addr, value, bits) {\
+    *((u##bits *)gmmio + (addr)) = value;\
+    u32 flush;\
+    MMIO_READ((addr + 0x32), flush, 32);\
+    flush = 0x0;\
+}
+
+
+/* FIXME: error handler ?*/
 
 static
 u32 setup_opRegion(void)
@@ -20,15 +24,17 @@ u32 setup_opRegion(void)
     return 0;
 }
 
-u32 gma_setup(u16 did)
+u32 gma_setup(struct pci_device *pci)
 {
-    /* check again*/
-    if(!IS_DEVICE_IGD(did))
+    /* check again */
+    if(!IS_DEVICE_IGD(pci->device))
         return 1;
     
-    setup_stolen();
-    setup_opRegion();
-    
+    u16 ggc = pci_config_readw(0, 0x50);
+    pci_config_writel(pci->bdf, 0x50, ggc);
+
+    u32 bdsm = pci_config_readl(0, 0xB4);
+    pci_config_writel(pci->bdf, 0x5C, bdsm);
     return 0;
 
 }
