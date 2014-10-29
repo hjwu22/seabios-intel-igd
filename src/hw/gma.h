@@ -10,16 +10,10 @@
  * 0x01         32MB
  * 0x02         64MB
  * y, y<=0x10   32*y MB
- * 
- * As GTT Stolen is always fixed at 2MB, the base address of GTT stolen
- * is next to MMCFG which the size is of 256MB at B000_0000h,
- * thus the base address of GTT Stolen is C000_0000h,
- * and stolen memory base addr is C001_0000h.
- * Aware that the lower boundary of PCI memory hole is E000_0000,
- * so total stolen memory address space should not over E000_0000
- * in this case, C000_0000 + 482 << 20 = DE01_0000
+ * The base of GFX stolen memory is TOLUD - GFX stolen memory size.
+ * The base of GFX GTT stolen memory is base of GFX stolen memory - 2MB. 
  */
-
+#define GFX_STOLEN_SIZE (0xf << 25)
 
 /* Intel Gen4 Core Family */
 #define IS_DEVICE_HASWELL(did) \
