@@ -415,16 +415,20 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
         pci_io_low_end = acpi_pm_base;
 
     /* setup GGC BGSM BDSM TOLUD */
-    /* FIXME: read fwcfg and determine IGD PT is enabled, 
+    /* FIXME: read fwcfg and determine IGD PT is enabled, also read GFX_STOLEN_SIZE 
      * then setup these registers */
     dprintf(1, "GMA: write BGSM GDSM, Q35 should update these memoryRegion\n");
     gms = GFX_STOLEN_SIZE >> 25;
     ggc_value= (ggms << 8) | (gms << 3) | (0x1 << 1) | REG_LOCK;
     pci_config_writew(bdf, Q35_HOST_BRIDGE_GGC, ggc_value);
-
-    gfx_stolen_base = 0xb0000000 -(gms << 25);
+    if (RamSize + RamSizeOver4G >= 0xb0000000) 
+        gfx_stolen_base = 0xb0000000 -(gms << 25);
+    else {
+        if (RamSize < (gms << 25) + (ggms << 20) + (16 << 20) )
+            panic("Not enough memory for IGD stolen memory!\n");
+        gfx_stolen_base = RamSize - (16 << 20) - (gms << 25);
+    }
     gfx_gtt_stolen_base = gfx_stolen_base - (ggms << 20) + 1;
-
     pci_config_writel(bdf, Q35_HOST_BRIDGE_BGSM, 
                         gfx_gtt_stolen_base | REG_LOCK);
     pci_config_writel(bdf, Q35_HOST_BRIDGE_BDSM,
