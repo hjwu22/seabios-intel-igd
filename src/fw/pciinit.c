@@ -421,6 +421,7 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
     gms = GFX_STOLEN_SIZE >> 25;
     ggc_value= (ggms << 8) | (gms << 3) | (0x1 << 1) | REG_LOCK;
     pci_config_writew(bdf, Q35_HOST_BRIDGE_GGC, ggc_value);
+    
     if (RamSize + RamSizeOver4G >= 0xb0000000) 
         gfx_stolen_base = 0xb0000000 -(gms << 25);
     else {
@@ -436,7 +437,9 @@ static void mch_mem_addr_setup(struct pci_device *dev, void *arg)
     pci_config_writel(bdf, 0xBC, 0xB0000000 | REG_LOCK );
     pci_config_writel(bdf, 0xA4, RamSize >> 20);
     pci_config_writel(bdf, 0xA0, REG_LOCK);
-    
+                   
+    pci_config_writel(bdf, 0x54,  (0x1 | (0x1 << 4)) );
+
     add_e820(gfx_gtt_stolen_base, (ggms<<20), E820_RESERVED);
     add_e820(gfx_stolen_base, (gms << 25), E820_RESERVED);
 
