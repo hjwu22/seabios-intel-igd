@@ -23,6 +23,7 @@ int VGAHookHandlerType VARFSEG;
 static void
 handle_155fXX(struct bregs *regs)
 {
+	dprintf(1,"interrput 155f%x can not be handled\n", regs->al);
     set_code_unimplemented(regs, RET_EUNSUPPORTED);
 }
 
@@ -176,10 +177,19 @@ via_setup(struct pci_device *pci)
  ****************************************************************/
 
 u8 IntelDisplayType VARFSEG, IntelDisplayId VARFSEG;
+static void
+intel_155f34(struct bregs *regs)
+{
+	dprintf(1, "handle intel 155f34 IGFX_LCD_PANEL_SCALING\n");
+    regs->ax = 0x005f;
+    regs->cl = 0x0;
+    set_success(regs);
+}
 
 static void
 intel_155f35(struct bregs *regs)
 {
+	dprintf(1, "handle intel 155f35\n");
     regs->ax = 0x005f;
     regs->cl = GET_GLOBAL(IntelDisplayType);
     set_success(regs);
@@ -188,6 +198,7 @@ intel_155f35(struct bregs *regs)
 static void
 intel_155f40(struct bregs *regs)
 {
+	dprintf(1, "handle intel 155f40\n");
     regs->ax = 0x005f;
     regs->cl = GET_GLOBAL(IntelDisplayId);
     set_success(regs);
@@ -196,18 +207,32 @@ intel_155f40(struct bregs *regs)
 static void
 intel_155f50(struct bregs *regs)
 {
+	dprintf(1, "handle intel 155f50\n");
     /* Mandatory hook on some Dell laptops */
     regs->ax = 0x005f;
     set_success(regs);
 }
+static void
+intel_155f51(struct bregs *regs)
+{
+	dprintf(1, "handle intel 155f51 EDP_ACTIVE_LFP_CONFIG_TYPE\n");
+   
+    regs->ax = 0x005f;
+	regs->cx = 0x00;
+    set_success(regs);
+}
+
 
 static void
 intel_155f(struct bregs *regs)
 {
+	dprintf(1, "handle intel_155f\n");
     switch (regs->al) {
     case 0x35: intel_155f35(regs); break;
     case 0x40: intel_155f40(regs); break;
     case 0x50: intel_155f50(regs); break;
+	case 0x34: intel_155f34(regs);break;
+	case 0x51: intel_155f51(regs);break;
     default:   handle_155fXX(regs); break;
     }
 }
@@ -229,6 +254,7 @@ intel_setup(struct pci_device *pci)
 
     IntelDisplayType = BOOT_DISPLAY_DEFAULT;
     IntelDisplayId = 3;
+	dprintf(1, "hookup intel VGA\n");
 }
 
 static void

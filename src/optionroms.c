@@ -19,7 +19,7 @@
 #include "std/pnpbios.h" // PNP_SIGNATURE
 #include "string.h" // memset
 #include "util.h" // get_pnp_offset
-
+#include "hw/gma.h" //intel IGD
 
 /****************************************************************
  * Helper functions
@@ -446,6 +446,10 @@ vgarom_setup(void)
         foreachpci(pci) {
             if (!is_pci_vga(pci))
                 continue;
+
+            if (IS_DEVICE_IGD(pci->device))
+                gma_setup(pci);
+
             vgahook_setup(pci);
             init_pcirom(pci, 1, NULL);
             break;
